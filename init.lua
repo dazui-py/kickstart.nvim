@@ -99,7 +99,7 @@ do
   vim.g.maplocalleader = ' '
 
   -- Set to true if you have a Nerd Font installed and selected in the terminal
-  vim.g.have_nerd_font = false
+  vim.g.have_nerd_font = true
 
   -- [[ Setting options ]]
   --  See `:help vim.o`
@@ -115,6 +115,22 @@ do
   -- Enable mouse mode, can be useful for resizing splits for example!
   vim.o.mouse = 'a'
 
+  -- Disable mouse on snacks
+  local grupo_mouse = vim.api.nvim_create_augroup("DesativarMouseDashboard", { clear = true })
+
+  vim.api.nvim_create_autocmd("FileType", {
+    group = grupo_mouse,
+    pattern = "snacks_dasboard",
+    callback = function()
+      if vim.bo.filetype == "snacks_dashboard" then
+        vim.opt.mouse = "" -- Desativa o toque/arrasto na tela inicial
+      else
+        vim.opt.mouse = "a" -- Reativa para você usar nos seus arquivos
+      end
+    end,
+  })
+
+
   -- Don't show the mode, since it's already in the status line
   vim.o.showmode = false
 
@@ -126,6 +142,9 @@ do
 
   -- Enable break indent
   vim.o.breakindent = true
+  vim.opt.autoindent = true
+  vim.opt.smartindent = true
+
 
   -- Enable undo/redo changes even after closing and reopening a file
   vim.o.undofile = true
@@ -218,6 +237,12 @@ do
   -- NOTE: This won't work in all terminal emulators/tmux/etc. Try your own mapping
   -- or just use <C-\><C-n> to exit terminal mode
   vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
+
+  vim.keymap.set('n', '<leader>r', function()
+    vim.cmd('write')
+    vim.cmd('!gcc "%" -o "%:r" && "./%:r"')
+    -- vim.cmd('echo "Done!"')
+end, { desc = 'Compile and run C' })
 
   -- TIP: Disable arrow keys in normal mode
   -- vim.keymap.set('n', '<left>', '<cmd>echo "Use h to move!!"<CR>')
@@ -382,9 +407,11 @@ do
   -- change the command under that to load whatever the name of that colorscheme is.
   --
   -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
-  vim.pack.add { gh 'folke/tokyonight.nvim' }
+  vim.pack.add { gh 'uhs-robert/oasis.nvim' }
   ---@diagnostic disable-next-line: missing-fields
-  require('tokyonight').setup {
+  require('oasis').setup {
+    style = "lagoon", -- light_style = "abyss",
+    intensity = 3, -- light_intensity = 3,
     styles = {
       comments = { italic = false }, -- Disable italics in comments
     },
@@ -393,7 +420,9 @@ do
   -- Load the colorscheme here.
   -- Like many other themes, this one has different styles, and you could load
   -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-  vim.cmd.colorscheme 'tokyonight-night'
+  -- vim.o.background = "dark"
+  vim.cmd.colorscheme("oasis")         -- Use your config settings
+  -- vim.cmd.colorscheme("oasis-desert")  Or load any specific style
 
   -- Highlight todo, notes, etc in comments
   vim.pack.add { gh 'folke/todo-comments.nvim' }
@@ -692,9 +721,9 @@ do
   --  See `:help lsp-config` for information about keys and how to configure
   ---@type table<string, vim.lsp.Config>
   local servers = {
-    -- clangd = {},
+    clangd = {},
     -- gopls = {},
-    -- pyright = {},
+    pyright = {},
     -- rust_analyzer = {},
     --
     -- Some languages (like typescript) have entire language plugins that can be useful:
@@ -761,6 +790,9 @@ do
   vim.list_extend(ensure_installed, {
     -- You can add other tools here that you want Mason to install
   })
+  ensure_installed = vim.tbl_filter(function(k)
+  return k ~= "lua_ls" and k ~= "stylua" and k ~= "clangd"
+end, ensure_installed)
 
   require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
@@ -852,10 +884,11 @@ do
       -- <c-k>: Toggle signature help
       --
       -- See `:help blink-cmp-config-keymap` for defining your own keymap
-      preset = 'default',
+      preset = 'enter',
 
       -- For more advanced Luasnip keymaps (e.g. selecting choice nodes, expansion) see:
       --    https://github.com/L3MON4D3/LuaSnip?tab=readme-ov-file#keymaps
+      ['<CR>'] = { 'select_and_accept', 'fallback' },
     },
 
     appearance = {
@@ -922,10 +955,10 @@ do
 
     -- Check if treesitter indentation is available for this language, and if so enable it
     -- in case there is no indent query, the indentexpr will fallback to the vim's built in one
-    local has_indent_query = vim.treesitter.query.get(language, 'indents') ~= nil
+    -- local has_indent_query = vim.treesitter.query.get(language, 'indents') ~= nil
 
     -- Enable treesitter based indentation
-    if has_indent_query then vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()" end
+    --if has_indent_query then vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()" end
   end
 
   local available_parsers = require('nvim-treesitter').get_available()
@@ -967,16 +1000,16 @@ do
   --  Uncomment any of the lines below to enable them (you will need to restart nvim).
   --
   -- require 'kickstart.plugins.debug'
-  -- require 'kickstart.plugins.indent_line'
+  require 'kickstart.plugins.indent_line'
   -- require 'kickstart.plugins.lint'
-  -- require 'kickstart.plugins.autopairs'
+  require 'kickstart.plugins.autopairs'
   -- require 'kickstart.plugins.neo-tree'
   -- require 'kickstart.plugins.gitsigns' -- adds gitsigns recommended keymaps
 
   -- NOTE: You can add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --
   --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
-  -- require 'custom.plugins'
+  require 'custom.plugins'
 end
 
 -- The line beneath this is called `modeline`. See `:help modeline`

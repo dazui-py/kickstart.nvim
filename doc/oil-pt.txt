@@ -1,0 +1,25 @@
+*oil-pt.txt* Tradução do Oil.nvim
+
+====================
+Oil.nvim Help-Tags
+====================
+
+Abrir Oil:
+    -       Abre o Oil no diretório atual
+
+Navegação:
+    -       Ir para diretório pai
+    <CR>    Abrir ficheiro/pasta
+    gx      Abrir externamente
+    gs      muda a ordenação dos ficheiros
+    g\      volta da pasta de lixo do dir. atual
+    <C-p>   abre uma janela de preview do ficheiro
+    <C-h>   abre o ficheiro numa janela horizonta
+    gx      abre o ficheiro com o programa externo
+
+Preview:
+    <C-p>   Abrir/fechar preview
+
+Notas:
+    Oil permite editar a estrutura de ficheiros
+    como se fosse um buffer normal.
